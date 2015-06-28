@@ -1,3 +1,6 @@
+@import 'owl.animate';
+@import 'owl.autoheight';
+
 /* 
  *  Core Owl Carousel CSS File
  */
@@ -106,3 +109,6 @@
 .no-js .owl-carousel {
 	display: block;
 }
+
+@import 'owl.lazyload';
+@import 'owl.video';
