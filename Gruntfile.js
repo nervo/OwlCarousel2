@@ -8,16 +8,12 @@
  */
 module.exports = function(grunt) {
 
-	if (!grunt.file.isDir('bower_components')) {
-		grunt.fail.fatal('>> Please run "bower install" before continuing.');
-	}
 	require('load-grunt-tasks')(grunt);
 
 	grunt
 		.initConfig({
 			pkg: grunt.file.readJSON('package.json'),
 			app: grunt.file.readJSON('_config.json'),
-			vendor: 'bower_components',
 			banner: '/**\n' + ' * Owl Carousel v<%= pkg.version %>\n'
 				+ ' * Copyright 2013-<%= grunt.template.today("yyyy") %> <%= pkg.author.name %>\n'
 				+ ' * Licensed under <%= pkg.license.type %> (<%= pkg.license.url %>)\n' + ' */\n',
@@ -89,7 +85,7 @@ module.exports = function(grunt) {
 				docs: {
 					options: {
 						outputStyle: 'compressed',
-						includePaths: [ '<%= app.docs.src %>/assets/scss/', 'bower_components/foundation/scss' ]
+						includePaths: [ '<%= app.docs.src %>/assets/scss/', 'node_modules/foundation-sites/scss' ]
 					},
 					files: {
 						'<%= app.docs.dest %>/assets/css/docs.theme.min.css': '<%= app.docs.src %>/assets/scss/docs.theme.scss'
@@ -97,24 +93,21 @@ module.exports = function(grunt) {
 				},
 				dist: {
 					options: {
-						outputStyle: 'nested'
-					},
-					files: [ {
+						outputStyle: 'nested',
 						expand: true,
-						flatten: true,
-						cwd: 'src/scss/',
-						src: '*scss',
-						dest: 'src/css/',
-						ext: '.css',
-						extDot: 'last'
-					} ]
+						flatten: true
+					},
+					files: {
+						'dist/assets/<%= pkg.name %>.css': 'src/scss/<%= pkg.name %>.scss',
+						'dist/assets/owl.theme.default.css': 'src/scss/owl.theme.default.scss',
+						'dist/assets/owl.theme.green.css': 'src/scss/owl.theme.green.scss'
+					}
 				}
 			},
 
 			concat: {
 				dist: {
 					files: {
-						'dist/assets/owl.carousel.css': [ 'src/css/*.css', '!src/css/owl.theme*.css' ],
 						'dist/<%= pkg.name %>.js': '<%= app.src.scripts %>'
 					}
 				}
@@ -123,9 +116,9 @@ module.exports = function(grunt) {
 			cssmin: {
 				dist: {
 					files: {
-						'dist/assets/<%= pkg.name %>.min.css': [ 'src/css/*.css', '!src/css/owl.theme*.css' ],
-						'dist/assets/owl.theme.default.min.css': 'src/css/owl.theme.default.css',
-						'dist/assets/owl.theme.green.min.css': 'src/css/owl.theme.green.css'
+						'dist/assets/<%= pkg.name %>.min.css': 'dist/assets/<%= pkg.name %>.css',
+						'dist/assets/owl.theme.default.min.css': 'dist/assets/owl.theme.default.css',
+						'dist/assets/owl.theme.green.min.css': 'dist/assets/owl.theme.green.css'
 					}
 				}
 			},
@@ -164,13 +157,6 @@ module.exports = function(grunt) {
 
 			// copy
 			copy: {
-				themes: {
-					expand: true,
-					flatten: true,
-					cwd: 'src/css/',
-					src: [ 'owl.theme.*' ],
-					dest: 'dist/assets'
-				},
 				distImages: {
 					expand: true,
 					flatten: true,
@@ -237,7 +223,7 @@ module.exports = function(grunt) {
 				},
 				sassDist: {
 					files: [ 'src/**/*.scss' ],
-					tasks: [ 'sass:dist', 'concat:dist', 'cssmin:dist', 'copy:themes','copy:distToDocs' ]
+					tasks: [ 'sass:dist', 'cssmin:dist', 'copy:distToDocs' ]
 				},
 				jsDocs: {
 					files: [ '<%= app.docs.src %>/assets/**/*.js' ],
@@ -284,7 +270,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('assemble');
 
 	// tasks
-	grunt.registerTask('dist', [ 'clean:dist', 'sass:dist', 'concat:dist', 'cssmin:dist', 'copy:themes', 'copy:distImages', 'jscs:dist', 'uglify:dist', 'copy:readme' ]);
+	grunt.registerTask('dist', [ 'clean:dist', 'sass:dist', 'concat:dist', 'cssmin:dist', 'copy:distImages', 'jscs:dist', 'uglify:dist', 'copy:readme' ]);
 
 	grunt.registerTask('docs', [ 'dist', 'clean:docs', 'assemble', 'sass:docs', 'copy:docsAssets', 'copy:distToDocs', 'zip' ]);
 
